@@ -1,0 +1,446 @@
+
+<!DOCTYPE  html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html
+  xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko" lang="ko">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>학습일지</title>
+
+
+  <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+  <meta HTTP-EQUIV="Expires" CONTENT="-1">
+  <meta http-equiv="refresh" content="-1">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , viewport-fit=cover">
+    <meta charset="UTF-8" />
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="
+  https://cdn.jsdelivr.net/npm/jquery-loadingModal@1.0.2/js/jquery.loadingModal.min.js
+  "></script>
+  <link href="
+  https://cdn.jsdelivr.net/npm/jquery-loadingModal@1.0.2/css/jquery.loadingModal.min.css
+  " rel="stylesheet">
+
+
+  <script type="text/javascript">
+ 
+
+function utf8_to_b64( str ) {
+  return window.btoa(unescape(encodeURIComponent( str )));
+}
+
+function b64_to_utf8( str ) {
+  str = str.replaceAll(" ","+")
+
+  return decodeURIComponent(escape(window.atob( str )));
+}
+
+
+const urlStr = window.location.href;
+
+const url = new URL(urlStr);
+
+const urlParams = url.searchParams;
+
+const ref1 = urlParams.get('ref1');
+
+console.log(ref1);
+
+const ref2 = urlParams.get('ref2');
+
+console.log(ref2);
+
+
+try {    
+
+var student = b64_to_utf8(ref1);
+console.log(student)
+
+var month = b64_to_utf8(ref2);
+console.log(month)
+
+} catch(e) {}
+
+function getJsonList(url) {
+   
+  var isSucess; 
+
+  $.ajax({
+          type: "get",            
+          url: url,         
+          async: false,
+          cache: false,                     
+          success: function(res){  
+            isSucess = res; 
+          }
+    });
+  return isSucess;
+}
+
+
+
+function csvToJSON(csv_string) {
+  const rows = csv_string.split("\r\n");
+  const jsonArray = [];
+  const header = rows[0].split(",");
+  for (let i = 1; i < rows.length; i++) {
+    let obj = {};
+    let row = rows[i].split(",");
+    for (let j = 0; j < header.length; j++) {
+      obj[header[j]] = row[j];
+    }
+    jsonArray.push(obj);
+  }
+  return jsonArray;
+}
+
+function GsheetToJSON(requestUrl) {
+
+  var tableList; 
+  
+  $.ajax({
+          type: "get",            
+          url: requestUrl,         
+          async: false,
+          cache: false,              
+          data: "",                
+          success: function(res){   
+
+          console.log($(res))
+          var table = $(res).find('.s1')
+          console.log(table)
+          tableList = [];
+
+          table.each(function(i,item){
+            console.log($(item).html())
+            var totalRow = parseInt($(item).html())
+
+            if(totalRow > 0){
+              totalRow = totalRow -1;
+            }
+
+            tableList.push(totalRow);
+
+          try{
+
+          }catch(e){}
+          });
+
+      }
+    });
+  return tableList;
+}
+
+$(function(){
+
+
+$('body').loadingModal({text: '생성중...'})
+
+
+setTimeout(function(){
+
+
+//try{
+
+var userListData = getJsonList('https://docs.google.com/spreadsheets/d/e/2PACX-1vTL1l7kkGoqRycPXW-vkvYuxx4WvhE7BubWWCNlkZzKQbTufIQ19EM96sa6jVzdv0eNRFodaOFGL8k8/pub?gid=0&single=true&output=csv')
+
+var userList = csvToJSON(userListData)
+
+//console.log(userList);
+
+var totalListData = getJsonList('https://docs.google.com/spreadsheets/d/e/2PACX-1vTL1l7kkGoqRycPXW-vkvYuxx4WvhE7BubWWCNlkZzKQbTufIQ19EM96sa6jVzdv0eNRFodaOFGL8k8/pub?gid=322683622&single=true&output=csv')
+
+var totalList = csvToJSON(totalListData)
+
+console.log(totalList);
+
+var checkSumData = GsheetToJSON('https://docs.google.com/spreadsheets/d/e/2PACX-1vTL1l7kkGoqRycPXW-vkvYuxx4WvhE7BubWWCNlkZzKQbTufIQ19EM96sa6jVzdv0eNRFodaOFGL8k8/pubhtml?gid=64744039&single=true')
+
+console.log(checkSumData);
+
+
+//if(progressList.length != checkSumData[0] || subjectList.length != checkSumData[1] || examList.length != checkSumData[2]){
+//console.log("Not sync!")
+//location.reload(true);
+//}
+
+var USER;
+
+for (var user of userList) {
+  if(user["학생아이디"]==student){
+  USER = user;
+  }
+}
+
+var totalListForMonth = []
+
+var nowMonth = month.replace(".0",". ")
+
+for (var i of totalList) {
+  if(i["날짜"].indexOf(nowMonth)!=-1){
+    totalListForMonth.push(i)
+  }
+}
+
+console.log(totalListForMonth)
+
+var totalListForUser = []
+
+for (var i of totalListForMonth) {
+  if(USER["학생아이디"] == i["학생아이디"]){
+    totalListForUser.push(i)
+  }
+}
+
+console.log(">>>> " + totalListForUser)
+
+var tdAdapter = $('#tbAdapter');
+
+for (var i of totalListForUser) {
+    var tbItem = $(".tbItem").first().clone().show()
+
+    if(i["날짜"] != '')
+    tbItem.find('.dateValue').html("<br>" + i["날짜"] + "<br><br>")
+
+
+    if(i["출석여부"] == '출석'){
+    tbItem.find('.checkValue').html("<br><font color='green'>" + i["출석여부"] + "</font><br><br>")
+    }
+    else{
+    tbItem.find('.checkValue').html("<br><font color='red'>" + i["출석여부"] + "</font><br><br>")
+    }
+
+
+    //if(i["출석여부"] != '')
+    //tbItem.find('.checkValue').html("<br>" + i["출석여부"] + "<br><br>")
+
+
+    if(i["진도"] != ''){
+
+    var removeString = i["진도"].replace(/['"]+/g, '')
+
+    tbItem.find('.progressValue').html("<pre style=''>" + removeString + "</pre>")
+    }
+
+    if(i["과제"] != ''){
+
+    var removeString = i["과제"].replace(/['"]+/g, '')
+
+    tbItem.find('.subjectValue').html("<pre>" + removeString + "</pre>")
+    }
+
+
+    if(i["듣기"] != '')
+    tbItem.find('.examValue').html(tbItem.find('.examValue').html() + "듣기 : " + i["듣기"] + "<br>")
+
+
+    if(i["모의고사"] != '')
+    tbItem.find('.examValue').html(tbItem.find('.examValue').html() + "모의고사 : " + i["모의고사"] + "<br>")
+
+
+    if(i["복습테스트"] != '')
+    tbItem.find('.examValue').html(tbItem.find('.examValue').html() + "복습테스트 : " + i["복습테스트"] + "<br>")
+
+
+    if(i["어휘"] != '')
+    tbItem.find('.examValue').html(tbItem.find('.examValue').html() + "어휘 : " + i["어휘"] + "<br>")
+
+
+    if(i["주간평가"] != '')
+    tbItem.find('.examValue').html(tbItem.find('.examValue').html() + "주간평가 : " + i["주간평가"] + "<br>")
+
+
+    $('#tbAdapter').append(tbItem)
+}
+
+
+for (var i of totalListForUser) {
+
+    if(i["상담"] != ''){
+
+    $('.opinionValue').append(i["날짜"] +" / 강사 의견 : "+ i["상담"])
+    $('.opinionValue').append("<br>")
+  }
+}
+
+$('.monthValue').html(month.split(".")[1]+"월")
+
+$('.nameValue').html(USER["이름"])
+$('.schoolValue').html(USER["학교"])
+$('.timeValue').html(USER["학년"])
+//$('.teacherValue').html(teacher)
+$('.classValue').html(USER["수업반"])
+
+//  }catch(e){
+
+// console.log("Error!")
+// location.reload(true);
+
+
+//  }
+
+$('body').loadingModal('destroy')
+
+},500)
+
+})
+
+
+  </script>
+
+    <style type="text/css"> * {margin:0; padding:0; text-indent:0; }
+ p { color: black; font-family:"Malgun Gothic", sans-serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 15pt; margin:0pt; }
+ .s1 { color: #FFF; font-family:"Times New Roman", serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 41pt; }
+ .s2 { color: #FFF; font-family:"Malgun Gothic", sans-serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 41pt; }
+ .s3 { color: #FFF; font-family:"Malgun Gothic", sans-serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 41pt; }
+ .h1 { color: black; font-family:"Malgun Gothic", sans-serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 41pt; }
+ .s4 { color: black; font-family:"Malgun Gothic", sans-serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 9pt; }
+ .s5 { color: black; font-family:"Malgun Gothic", sans-serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 9pt; }
+ .s6 { color: #FFF; font-family:"Malgun Gothic", sans-serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 11pt; }
+ .s7 { color: black; font-family:"Malgun Gothic", sans-serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 10pt; }
+ table, tbody {vertical-align: top; overflow: visible; }
+</style>
+  </head>
+  <body style="margin: 15px;">
+    <br>
+    <br>
+  <!-- 
+    <p style="text-indent: 0pt;line-height: 22pt;text-align: right;">고등영어</p> -->
+    <p style="text-indent: 0pt;line-height: 69pt;text-align: center;">
+      <span class="s1" style=" background-color: #BA001F;"></span>
+      <span class="s2 monthValue" style=" background-color: #BA001F;"></span>
+      <span class="s3"></span>
+      <span class="h1">학습일지</span>
+    </p>
+
+
+    <center>
+    <p style="padding-top: 4pt;text-indent: 0pt;text-align: left;">
+      <br/>
+    </p>
+
+    <table style="border-collapse:collapse;margin-left:5.73999pt" cellspacing="0">
+      <tr style="height:16pt">
+        <td style="width:110pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">이름</p>
+        </td>
+        <td style="width:110pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">학교</p>
+        </td>
+        <td style="width:110pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">학년</p>
+        </td>
+
+
+<!--         <td style="width:0pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">담당 선생님</p>
+        </td> -->
+
+
+        <td style="width:220pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">반명</p>
+        </td>
+      </tr>
+      <tr style="height:16pt">
+        <td style="width:110pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 nameValue" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;"></p>
+        </td>
+        <td style="width:110pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 schoolValue" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;"></p>
+        </td>
+        <td style="width:110pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 timeValue" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;"></p>
+        </td>
+
+
+ <!--        <td style="width:111pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 teacherValue" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;"></p>
+        </td> -->
+
+
+        <td style="width:220pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 classValue" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;"></p>
+        </td>
+      </tr>
+    </table>
+
+
+    <p style="padding-top: 13pt;text-indent: 0pt;text-align: left;">
+      <br/>
+    </p>
+
+    <table style="border-collapse:collapse;margin-left:5.73999pt" cellspacing="0" id="tbAdapter">
+
+       <tr style="height:17pt">
+        <td style="width:551pt;border-bottom-style:solid;border-bottom-width:1pt" colspan="5" bgcolor="#BA001F">
+          <p class="s6" style="padding-left: 1pt;text-indent: 0pt;line-height: 16pt;text-align: center;">학습 현황</p>
+        </td>
+      </tr>
+
+
+      <tr style="height:16pt">
+        <td style="width:82pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">날짜</p>
+        </td>
+        <td style="width:82pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">출결</p>
+        </td>
+        <td style="width:150pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">진도</p>
+        </td>
+        <td style="width:150pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">과제</p>
+        </td>
+        <td style="width:82pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" bgcolor="#D8D8D8">
+          <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;">일일테스트</p>
+        </td>
+      </tr>
+
+      <tr style="height:16pt; display:none" class="tbItem">
+        <td style="width:82pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 dateValue" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;    vertical-align: middle;"></p>
+        </td>
+        <td style="width:82pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 checkValue" style="padding-left: 2pt;text-indent: 0pt;line-height: 15pt;text-align: center;    vertical-align: middle;"></p>
+        </td>
+        <td style="width:150pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 progressValue" style="padding: 6pt;text-indent: 0pt;line-height: 15pt;text-align: left;    vertical-align: middle;"></p>
+        </td>
+        <td style="width:150pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 subjectValue" style="padding: 6pt;text-indent: 0pt;line-height: 15pt;text-align: left;    vertical-align: middle;"></p>
+        </td>
+        <td style="width:82pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s5 examValue" style="padding: 6pt;text-indent: 0pt;line-height: 15pt;text-align: center;    vertical-align: middle;"></p>
+        </td>
+      </tr>
+
+    </table>
+
+
+    <p style="padding-top: 13pt;text-indent: 0pt;text-align: left;">
+      <br/>
+    </p>
+
+     <table style="border-collapse:collapse;margin-left:5.73999pt" cellspacing="0">
+
+       <tr style="height:17pt">
+        <td style="width:551pt;border-bottom-style:solid;border-bottom-width:1pt" colspan="5" bgcolor="#BA001F">
+          <p class="s6" style="padding-left: 1pt;text-indent: 0pt;line-height: 16pt;text-align: center;">강사 의견</p>
+        </td>
+      </tr>
+
+
+      <tr style="height:56pt">
+        <td style="width:551pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+          <p class="s4 resultArea opinionValue" style="padding: 10pt;text-indent: 0pt;line-height: 15pt;text-align: left;" >
+        </td>
+      </tr>
+      
+    </table> 
+
+<br><br><br>
+
+</center>
+  </body>
+</html>

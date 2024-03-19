@@ -1,1 +1,108 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Web site created using create-react-app"/><link rel="apple-touch-icon" href="/logo192.png"/><link rel="manifest" href="/manifest.json"/><title>React App</title><script defer="defer" src="/static/js/main.af9922e4.js"></script><link href="/static/css/main.ae588696.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<html>
+  <head>
+    <title>Dashboard</title>
+    <meta charset="UTF-8" />
+    <style>
+      iframe {
+        display: block;
+        border: none;
+        height: 90vh;
+        width: 100vw;
+      }
+
+
+    .button {
+      display: inline-block;
+      border-radius: 4px;
+      background-color: #f4511e;
+      border: none;
+      color: #FFFFFF;
+      text-align: center;
+      font-size: 14px;
+      padding: 10px;
+      width: 100px;
+      transition: all 0.5s;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .button span {
+      cursor: pointer;
+      display: inline-block;
+      position: relative;
+      transition: 0.5s;
+    }
+
+    .button span:after {
+      content: '\00bb';
+      position: absolute;
+      opacity: 0;
+      top: 0;
+      right: -20px;
+      transition: 0.5s;
+    }
+
+    .button:hover span {
+      padding-right: 25px;
+    }
+
+
+    </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js">
+  </script>
+  <script src="
+  https://cdn.jsdelivr.net/npm/jquery-loadingModal@1.0.2/js/jquery.loadingModal.min.js
+  "></script>
+  <link href="
+  https://cdn.jsdelivr.net/npm/jquery-loadingModal@1.0.2/css/jquery.loadingModal.min.css
+  " rel="stylesheet">
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="product">
+        <center>
+<!--         <button class="favorite styled button" type="button" onclick="goPopup('./progress.html')">
+          진도 추가
+        </button>
+        <button class="favorite styled button" type="button" onclick="goPopup('./subject.html')">
+          과제 추가
+        </button>
+        <button class="favorite styled button" type="button" onclick="goPopup('./exam.html')">
+          시험 추가
+        </button> -->
+        <button class="favorite styled button" type="button" onclick="goPopup('./class.html')">
+          출석부 입력
+        </button>
+        <button class="favorite styled button" type="button" onclick="goPopup('./export.html')">
+          보고서 출력
+        </button>
+        </center>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+
+function goPopup(url){
+  var name = "Popup";
+  var option = "width = 500, height = 700, top = 100, left = 200, location = no"
+  window.open(url, name, option);  
+
+}
+
+
+$("<iframe>", {
+  src: "https://docs.google.com/spreadsheets/d/132q1hzTEGOEEehnBBFVCKxQ9sMUf3TncskbKB_l_cUI/edit#gid=322683622",
+  id: "dataTable",
+}).appendTo("body");
+      
+
+
+    </script>
+
+
+  </body>
+</html>
+
