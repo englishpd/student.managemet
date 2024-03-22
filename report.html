@@ -552,7 +552,7 @@ $('body').loadingModal({text: '생성중...'})
 setTimeout(function(){
 
 
-try{
+// try{
 
 var userListData = getJsonList('https://docs.google.com/spreadsheets/d/e/2PACX-1vTL1l7kkGoqRycPXW-vkvYuxx4WvhE7BubWWCNlkZzKQbTufIQ19EM96sa6jVzdv0eNRFodaOFGL8k8/pub?gid=0&single=true&output=csv')
 
@@ -613,16 +613,19 @@ var totalListExam1 = []
 var totalListExam2 = []
 var totalListExam3 = []
 var totalListExam4 = []
+var totalListExam5 = []
 
 var totalListExam1ForUser = []
 var totalListExam2ForUser = []
 var totalListExam3ForUser = []
 var totalListExam4ForUser = []
+var totalListExam5ForUser = []
 
 var totalListExam1ForDate = []
 var totalListExam2ForDate = []
 var totalListExam3ForDate = []
 var totalListExam4ForDate = []
+var totalListExam5ForDate = []
 
 
 for (var i of totalListForMonth) {
@@ -644,14 +647,14 @@ for (var i of totalListForMonth) {
     }
     totalListExam1ForDate.push(i)
   }
-  if(USER["복습테스트"] != ""){
+  if(USER["복습평가"] != ""){
 
-    if(i["복습테스트"].indexOf("/") != -1){
-      var firstValue = parseInt(i["복습테스트"].split("/")[0])
-      var secondValue = parseInt(i["복습테스트"].split("/")[1])
+    if(i["복습평가"].indexOf("/") != -1){
+      var firstValue = parseInt(i["복습평가"].split("/")[0])
+      var secondValue = parseInt(i["복습평가"].split("/")[1])
       var intValue = parseInt((firstValue/secondValue) * 100);
     }else{
-      var intValue = parseInt(i["복습테스트"])
+      var intValue = parseInt(i["복습평가"])
     }
     if(!isNaN(intValue))
     totalListExam2.push(intValue)
@@ -698,11 +701,26 @@ for (var i of totalListForMonth) {
     }
     totalListExam4ForDate.push(i)
   }
+  if(USER["주간평가"] != ""){
+
+    if(i["주간평가"].indexOf("/") != -1){
+      var firstValue = parseInt(i["주간평가"].split("/")[0])
+      var secondValue = parseInt(i["주간평가"].split("/")[1])
+      var intValue = parseInt((firstValue/secondValue) * 100);
+    }else{
+      var intValue = parseInt(i["주간평가"])
+    }
+
+
+    if(!isNaN(intValue))
+    totalListExam5.push(intValue)
+
+    if(USER["학생아이디"] == i["학생아이디"] && !isNaN(intValue)){
+      totalListExam5ForUser.push(intValue)
+    }
+    totalListExam5ForDate.push(i)
+  }
 }
-
-var gList = {"g1":0,"g2":0,"g3":0,"g4":0,}
-var gListForUser= {"g1":0,"g2":0,"g3":0,"g4":0,}
-
 
 //1
 
@@ -798,12 +816,12 @@ for (var date of uniqueArr){
 
       if(date == i["날짜"]){ 
 
-      if(i["복습테스트"].indexOf("/") != -1){
-        var firstValue = parseInt(i["복습테스트"].split("/")[0])
-        var secondValue = parseInt(i["복습테스트"].split("/")[1])
+      if(i["복습평가"].indexOf("/") != -1){
+        var firstValue = parseInt(i["복습평가"].split("/")[0])
+        var secondValue = parseInt(i["복습평가"].split("/")[1])
         var intValue = parseInt((firstValue/secondValue) * 100);
       }else{
-        var intValue = parseInt(i["복습테스트"])
+        var intValue = parseInt(i["복습평가"])
       }
 
       if(!isNaN(intValue))
@@ -950,6 +968,62 @@ for (var date of uniqueArr){
 }
 
 
+//5
+
+var gData5 = [];
+
+gData5.push(['날짜', '평균', { role: 'style' }, '내 점수', { role: 'style' } , '만점', { role: 'style' } ])
+
+var dupArr =  [];
+
+for (var i = 0; i < totalListExam5ForDate.length; i++) {
+    dupArr.push(totalListExam5ForDate[i]["날짜"])
+}
+
+var uniqueArr = dupArr.filter((element, index) => {
+    return dupArr.indexOf(element) === index;
+});
+
+for (var date of uniqueArr){
+
+  var item = [];
+  var itemValue = 0;
+  var itemCount = 0;
+  var userPoint = 0;
+
+  for (var i of totalListExam5ForDate) {
+
+      if(date == i["날짜"]){ 
+
+      if(i["주간평가"].indexOf("/") != -1){
+        var firstValue = parseInt(i["주간평가"].split("/")[0])
+        var secondValue = parseInt(i["주간평가"].split("/")[1])
+        var intValue = parseInt((firstValue/secondValue) * 100);
+      }else{
+        var intValue = parseInt(i["주간평가"])
+      }
+
+      if(!isNaN(intValue))
+        itemValue = itemValue + intValue;
+
+      if(i["학생아이디"]==student){
+        if(!isNaN(intValue))
+        userPoint = intValue;
+      }
+      itemCount = itemCount+1;
+      }
+   }
+   //colors: ['#D7A1F9', '#B24BF3', 'red']
+    item.push(date)
+    item.push(itemValue/itemCount)
+    item.push('color: #D7A1F9')
+    item.push(userPoint)
+    item.push('color: #B24BF3')
+    item.push(100)
+    item.push('color: red')
+    gData5.push(item)
+}
+
 
 var totalListForUser = []
 
@@ -1011,8 +1085,8 @@ for (var i of totalListForUser) {
     tbItem.find('.examValue1').html(tbItem.find('.examValue1').html() + i["듣기"] + "<br>")
 
 
-    if(i["복습테스트"] != '')
-    tbItem.find('.examValue2').html(tbItem.find('.examValue2').html() +  i["복습테스트"] + "<br>")
+    if(i["복습평가"] != '')
+    tbItem.find('.examValue2').html(tbItem.find('.examValue2').html() +  i["복습평가"] + "<br>")
 
 
     if(i["모의고사"] != '')
@@ -1044,15 +1118,15 @@ $('.timeValue').html(USER["학년"])
 //$('.teacherValue').html(teacher)
 $('.classValue').html(USER["수업반"])
 
-drawChart(gData1, gData2, gData3, gData4);
+drawChart(gData1, gData2, gData3, gData4, gData5);
 
- }catch(e){
+//  }catch(e){
 
-console.log("Error!")
-location.reload(true);
+// console.log("Error!")
+// location.reload(true);
 
 
- }
+//  }
 
 
 
@@ -1218,9 +1292,9 @@ table, th, td {
             <td class="column6 style41 s style50" rowspan="1" style="text-align:center">과제</td>
             <td class="column9 style41 s style50" rowspan="1" style="text-align:center">어휘</td>
             <td class="column7 style41 s style50" rowspan="1" style="text-align:center">듣기</td>
-            <td class="column8 style41 s style50" rowspan="1" style="text-align:center">복습테스트</td>
-            <td class="column10 style41 s style50" rowspan="1" style="text-align:center">모의고사</td>
+            <td class="column8 style41 s style50" rowspan="1" style="text-align:center">복습평가</td>
             <td class="column11 style40 s style50" rowspan="1" style="text-align:center">주간평가</td>
+            <td class="column10 style41 s style50" rowspan="1" style="text-align:center">모의고사</td>
           </tr>
 <!--           <tr class="row9">
             <td class="column0 style42 null"></td>
@@ -1239,8 +1313,8 @@ table, th, td {
             <td class="column9 style56 n examValue3" style="text-align:center"></td>
             <td class="column7 style56 n examValue1" style="text-align:center"></td>
             <td class="column8 style56 n examValue2" style="text-align:center"></td>
-            <td class="column10 style56 n examValue4" style="text-align:center"></td>
-            <td class="column11 style57 n examValue"  style="text-align:center"></td>
+            <td class="column10 style56 n examValue" style="text-align:center"></td>
+            <td class="column11 style57 n examValue4"  style="text-align:center"></td>
           </tr>
         </tbody>
     </table>
@@ -1249,7 +1323,30 @@ table, th, td {
     <script type="text/javascript">
       google.charts.load("current", {packages:["corechart"]});
       //google.charts.setOnLoadCallback(drawChart);
-      function drawChart(gData1, gData2, gData3, gData4) {
+      function drawChart(gData1, gData2, gData3, gData4, gData5) {
+
+        if(gData1.length > 1){
+          $('#chart_div1').show()
+        }
+        if(gData2.length > 1){
+          $('#chart_div2').show()
+          
+        }
+        if(gData3.length > 1){
+          $('#chart_div3').show()
+          
+        }
+        if(gData4.length > 1){
+          $('#chart_div4').show()
+          
+        }
+        if(gData5.length > 1){
+          $('#chart_div5').show()
+          
+        }
+
+
+
 
         var data = google.visualization.arrayToDataTable(gData3);
         var options = {
@@ -1281,7 +1378,7 @@ table, th, td {
 
         var data = google.visualization.arrayToDataTable(gData2);
         var options = {
-          title : '복습테스트',
+          title : '복습평가',
           vAxis: {title: '점수'},
           hAxis: {title: '기간'},
           seriesType: 'bars',
@@ -1307,6 +1404,19 @@ table, th, td {
         var chart = new google.visualization.ComboChart(document.getElementById('chart_div4'));
         chart.draw(data, options);
 
+
+        var data = google.visualization.arrayToDataTable(gData5);
+        var options = {
+          title : '주간평가',
+          vAxis: {title: '점수'},
+          hAxis: {title: '기간'},
+          seriesType: 'bars',
+          series: {2: {type: 'line'}},
+          colors: ['#D7A1F9', '#B24BF3', 'red']
+        };
+
+        var chart = new google.visualization.ComboChart(document.getElementById('chart_div5'));
+        chart.draw(data, options);
 
 }
 
@@ -1338,10 +1448,11 @@ table, th, td {
 
     <div class="container">
 
-    <div class="item" id="chart_div1" style="width: 500px; height: 300px;"></div>
-    <div class="item" id="chart_div2" style="width: 500px; height: 300px;"></div>
-    <div class="item" id="chart_div3" style="width: 500px; height: 300px;"></div>
-    <div class="item" id="chart_div4" style="width: 500px; height: 300px;"></div>
+    <div class="item" id="chart_div1" style="width: 500px; height: 300px; display: none;"></div>
+    <div class="item" id="chart_div2" style="width: 500px; height: 300px; display: none;"></div>
+    <div class="item" id="chart_div3" style="width: 500px; height: 300px; display: none;"></div>
+    <div class="item" id="chart_div5" style="width: 500px; height: 300px; display: none;"></div>
+    <div class="item" id="chart_div4" style="width: 500px; height: 300px; display: none;"></div>
     </div>
 
     </center>

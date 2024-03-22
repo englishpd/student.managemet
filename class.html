@@ -92,7 +92,15 @@ input[type=submit]:hover {
   <label for="subjectValue">과제:</label><br>    
   <textarea id="subjectValue" name="subjectValue" rows="10" ></textarea>
 
-
+    <label for="typeValue">과제평가:</label>
+    <select id="typeValue" name="typeValue">
+      <option selected disabled>---선택하세요---</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+      <option value="D">D</option>
+      <option value="F">F</option>
+    </select>
 
     <input type="button" id="submitButton" value="입력">
   </form>
@@ -234,17 +242,25 @@ $("#submitButton").click(function() {
 
 	if(selectValue == 'all'){
 		for(i in userList){
-				createData(userList[i]["학생아이디"],userList[i]["이름"]);
+				createData(userList[i]["학생아이디"],userList[i]["이름"],userList[i]["수업반"]);
 		}
 	}
 	else if(uniqueArr.indexOf(selectValue) != -1){
 		for(i in userList){
 			if(selectValue == userList[i]["수업반"]){
-				createData(userList[i]["학생아이디"],userList[i]["이름"]);
+				createData(userList[i]["학생아이디"],userList[i]["이름"],userList[i]["수업반"]);
 			}
 		}
 	}else{
-		createData(selectValue,selectText);
+
+    var classname = '';
+
+		for(i in userList){
+      if(selectValue == userList[i]["이름"]){
+        classname = userList[i]["수업반"]
+      }
+    }
+    createData(selectValue,selectText,classname);
 	}
 
   $('body').loadingModal('destroy')
@@ -258,7 +274,7 @@ $("#submitButton").click(function() {
 });
 
 
-function createData(studentId , name){
+function createData(studentId , name, classname){
 	var requestUrl =
     "https://docs.google.com/forms/u/0/d/e/1FAIpQLScBDiDgLllDj3kr3fziqgzGitWY6DqWnNS0QcMkvHVg-83F-Q/formResponse";
 
@@ -274,6 +290,7 @@ function createData(studentId , name){
   var requestData = {};
   requestData["entry.641291297"] = studentId;
   requestData["entry.2041164107"] = name;
+  requestData["entry.1461543487"] = classname;
 
   requestData["entry.980302389_year"] = yyyymmdd[0];
   requestData["entry.980302389_month"] = yyyymmdd[1];
@@ -284,6 +301,7 @@ function createData(studentId , name){
 
   requestData["entry.945194838"] = $('#progressValue').val();
   requestData["entry.263321010"] = $('#subjectValue').val();
+  requestData["entry.1792748655"] = $('#typeValue').val();
 
   //$.get(requestUrl,requestData);
   $.ajax({
