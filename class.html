@@ -242,22 +242,26 @@ $("#submitButton").click(function() {
 
 	if(selectValue == 'all'){
 		for(i in userList){
-				createData(userList[i]["학생아이디"],userList[i]["이름"],userList[i]["수업반"]);
+        createData(userList[i]["학생아이디"],userList[i]["이름"],userList[i]["수업반"],userList[i]["학교"],userList[i]["학년"]);
 		}
 	}
 	else if(uniqueArr.indexOf(selectValue) != -1){
 		for(i in userList){
 			if(selectValue == userList[i]["수업반"]){
-				createData(userList[i]["학생아이디"],userList[i]["이름"],userList[i]["수업반"]);
+				createData(userList[i]["학생아이디"],userList[i]["이름"],userList[i]["수업반"],userList[i]["학교"],userList[i]["학년"]);
 			}
 		}
 	}else{
 
     var classname = '';
+    var school = '';
+    var grade = '';
 
 		for(i in userList){
       if(selectValue == userList[i]["이름"]){
         classname = userList[i]["수업반"]
+        school = userList[i]["학교"]
+        grade = userList[i]["학년"]
       }
     }
     createData(selectValue,selectText,classname);
@@ -274,7 +278,7 @@ $("#submitButton").click(function() {
 });
 
 
-function createData(studentId , name, classname){
+function createData(studentId , name, classname, school, grade){
 	var requestUrl =
     "https://docs.google.com/forms/u/0/d/e/1FAIpQLScBDiDgLllDj3kr3fziqgzGitWY6DqWnNS0QcMkvHVg-83F-Q/formResponse";
 
@@ -291,6 +295,13 @@ function createData(studentId , name, classname){
   requestData["entry.641291297"] = studentId;
   requestData["entry.2041164107"] = name;
   requestData["entry.1461543487"] = classname;
+
+  requestData["entry.545802197"] = school;
+  requestData["entry.1435722973"] = grade;
+//11entry.545802197: 11
+//entry.1435722973: 22
+
+
 
   requestData["entry.980302389_year"] = yyyymmdd[0];
   requestData["entry.980302389_month"] = yyyymmdd[1];
